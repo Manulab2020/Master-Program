@@ -1,0 +1,31 @@
+1. Movicon
+- User chooses product (product ID, INT)
+- User inserts name (username, STRING)
+- User presses order button (order confirmed, BOOL)
+- Variables shared with Sysmac are updated, and thus transmitted
+- Movicon starts Python script (needs some delay to account for Sysmac processing time)
+
+
+2. Sysmac initial processing
+- Sysmac receives variables
+  - If program is ongoing, add to queue
+- Order confirmed being set to TRUE starts the program, set Order confirmed to FALSE
+- Product ID determines what part of the program is run (one per product)
+- Sysmac checks current Kanban storage
+  - If the needed parts exist, send LD robot to pick them up and order new print
+  - If they don't, order new print and wait for completion, then do as above. 
+- Sysmac runs code that updates the info.csv for AddTextToDxf with username
+- Send LD robot to manually use laser cutter and pick up objects
+
+
+LD robot, laser cutter
+- Once Dxt has been created, and Sysmac assigns a laser cutter job, send Taklo there. 
+- Use vision to find control panel and start the laser cutter process
+- Wait, and use vision to see when laser cutting process finishes, then pick up and either...
+  - Carry plate to post-processing table for extraction
+  - Put plate on Finnson or Ringstad and have them deliver to the table
+
+LD robot, 3D printer, kanban
+- Taklo drives to kanban storage
+- Vision to find parts to pick up. 
+- 
