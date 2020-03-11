@@ -1,0 +1,43 @@
+0000 - Initial setup
+	0100 - Set initial variables where necessary
+	0200 - Check kanban storage and order new prints if too low
+	0300 - Connect to LD robot
+	0400 - ____
+
+No state - Code that always runs in the background
+ - Update status for all Manulab robots
+ - If a new order is received while another is processing, add order to the end of the queue array
+
+1000 - Idle
+ - Wait for customer order
+ - When one is received, copy it to orderCurrent and clear the original customerOrder, then move to state 2000
+ - If no order is being processed at the moment and there is an order waiting in queue spot 1, copy it to orderCurrent and move to state 2000
+
+2000 - Process order
+	2000 - Initial setup, if required
+	2100 - Processing for cutting 
+	 - Check product ID, then apply the corresponding DXF info to be processed
+	 - Add name to use on the plate/keychain
+	2200 - Processing for printing
+	 - Check kanban storage, and change printerPartsInStore if there are or aren't enough printed parts
+
+3000 - Assign work tasks
+	3000 - Initial setup, if required
+	3100 - Assign cutter tasks
+	 - Start program to csv dxf converter, then tell Movicon to run the dxf script function
+	3200 - Assign printer tasks
+		3200 - Iterate over printer array to find the first available printer
+		3210 - Write information to printer command struct
+		3220 - Write printer command struct to csv, then tell Movicon to start the printer script
+	3300 - Assign LD robot tasks
+	 - If there are parts in store, send Taklo and either Finnson or Ringstad to put up parts 
+
+4000 - Follow progress and update, work management
+
+5000 - Assembly and delivery
+
+6000 - Update statuses and clean up
+
+9000 - Errors
+
+10000 - state is set here when you don't want to run and loop the main program
