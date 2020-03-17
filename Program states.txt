@@ -7,6 +7,7 @@
 No state - Code that always runs in the background
  - Update status for all Manulab robots
  - If a new order is received while another is processing, add order to the end of the queue array
+ - Check current buffer, and if current parts is smaller than buffer, order new parts
 
 1000 - Idle
  - Wait for customer order
