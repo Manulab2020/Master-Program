@@ -32,7 +32,7 @@ Y=4: TM robot
  - If no order is being processed at the moment and there is an order waiting in queue spot 1, copy it to orderCurrent and move to state 2000
 
 Independent of master state:
-- If a new order is received while another is processing, add order to the end of the queue array
+- If a new order is received while master state is not 1000, add order to the end of the queue array
 
 2000 - Process order
 	2000 - Initial setup, if required
@@ -46,32 +46,31 @@ Independent of master state:
 3000 - Assign work tasks
 	3000 - Initial setup, set variables for later use
 	3100 - Assign cutter tasks
-	 - Start program to csv dxf converter, then tell Movicon to run the dxf script function
+	 - Start program to csv to dxf converter, then tell Movicon to run the dxf script function
 	3200 - Assign printer tasks
 		3200 - Iterate over printer array to find the first available printer, if there are any. 
-		3210 - Write information to printer command struct
+		3210 - Write information to printer command struct, telling it to print a new part of the product ID regardless of current inventory
 		3220 - Write printer command struct to csv, then tell Movicon to start the printer script
 	3300 - Assign LD robot tasks
-	 - If there are parts in store, send Taklo and either Finnson or Ringstad to put up parts 
+	 - If there are parts in store, send Taklo and either Finnson or Ringstad to pick up printed parts from kanban. If not, wait until one has been printed. 
 
 4000 - Wait and follow production
-	4000 - Setup
+	4000 - Setup, wait until part has been picked up from kanban
 	4100 - Wait until cutterStatus says the cutting is done
-	4200 - Printer tasks
-	 - If printed parts are in storage, reduce current part number by 1 once LD has retrieved it
-	 - If printed parts are not in storage, ____
-	4300 - LD tasks
+	4200 - No more actions needed for printer
+	4300 - Pick up acrylic piece from laser cutter and bring to assembly
 
 5000 - Assembly and delivery
+	5000 - Start assembly
+	5100 - Assembly complete, reset variables
+	5200 - Pick up product and move to delivery location
 
 6000 - Post-production cleanup
  - Clear out variables that need to be empty for the next order. 
  - If order was started from a queue, then move all spots in the queue down one, so the previous queue spot 2 is now 1, 3 is now 2, etc and clear the last position in the queue. 
 
 9000 - Errors
-- Divide master state it originated from by 10 and add 9 to front. Do error handling of them here.
-
-10000 - state is set here when you don't want to run and loop the main program
+- Perform error handling. Divide master state it originated from by 10 and add 9 to front to get error state.
 
 
 ---------------------------------------------------------------------------------------------------------
@@ -79,8 +78,11 @@ Independent of master state:
 BACKGROUND CODE
 Code that always runs in the background, infinitely looping at a lower cycle time
 
-- Update status for cutter and printer
+- Update status for cutter
+- Update status for printers
+- Update list for current prints in progress
 - Confirm that buffer size is within reasonable bounds. If not, force it up to 0 or down to 20.
-- Check printer status array if there are any finished prints. If yes, carry the print to kanban and add to current number of prints in store. 
+- Check that the printers' bed temperature or nozzle temperature hasn't gotten too high, force shutdown if yes. Safety measure against hardware damage. 
+- Check printer status array if there are any finished prints. If yes, carry the print to kanban and update current values for parts in store and current prints
 - Check current buffer. If current parts in storage is smaller than buffer, then order new prints and add update the list of what printers are printing something and how many brackets/frames are being printed.
 - Send all updated statuses to movicon. 
